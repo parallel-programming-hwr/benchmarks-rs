@@ -2,15 +2,27 @@
 
 mod to_bench;
 
+use crate::to_bench::{bitshift_byte, max_f32_multiplication, max_u64_multiplications};
 use benchlib::benching::Bencher;
 use rayon::prelude::*;
+
+pub fn noop() {}
 
 pub fn main() {
     let mut bencher = Bencher::new();
     bencher
         .set_iterations(10000)
         .print_settings()
-        .bench("Dry Run", || {})
+        .bench("Empty closure", || {})
+        .bench("Empty fn", noop)
+        .bench("Empty loop to 1000", || for _ in 0..1000 {})
+        .bench("u64::MAX x u64::MAX 1000 times", || {
+            max_u64_multiplications(1000)
+        })
+        .bench("f32::MAX x f32::MAX 1000 times", || {
+            max_f32_multiplication(1000)
+        })
+        .bench("Bitshift u16 1 byte 1000 times", || bitshift_byte(1000))
         .bench("Multiply to 100", || to_bench::multiply_to(100))
         .bench("Summation from 0u32 to 10000", || {
             to_bench::summation_to::<u32>(10000)

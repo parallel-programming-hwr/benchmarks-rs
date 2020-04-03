@@ -3,9 +3,11 @@ use crossbeam_utils::sync::WaitGroup;
 use num_cpus;
 use num_traits::{PrimInt, Unsigned};
 use rayon::prelude::*;
+use std::f32;
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::u64;
 
 pub fn start_stop_thread() {
     let handle = thread::spawn(|| {
@@ -122,4 +124,32 @@ pub fn start_and_wait_for_num_cpu_threads() {
         });
     }
     wg.wait();
+}
+
+pub fn max_f32_multiplication(times: usize) -> f64 {
+    let mut result = 0f64;
+    for _ in 0..times {
+        result = f32::MAX as f64 * f32::MAX as f64;
+    }
+
+    result
+}
+
+pub fn max_u64_multiplications(times: usize) -> u128 {
+    let mut result = 0u128;
+    for _ in 0..times {
+        result = u64::MAX as u128 * u64::MAX as u128
+    }
+
+    result
+}
+
+pub fn bitshift_byte(times: usize) -> u16 {
+    let mut result = 0u16;
+    for _ in 0..(times / 2) {
+        result = result << 8;
+        result = result >> 8;
+    }
+
+    result
 }

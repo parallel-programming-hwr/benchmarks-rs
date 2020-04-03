@@ -8,9 +8,9 @@ checksum = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 
 [[package]]
 name = "benchlib-rs"
-version = "0.2.2"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eec9a8d80e5bb03637e22ea0900b8ac12c3b9e21215dfda88347b03f056d5d7"
+checksum = "e2b157249b658c600bea79e0ab5366561edf01f6e0dd0ba0075f0ad3945c2420"
 dependencies = [
  "rayon",
  "termion",
