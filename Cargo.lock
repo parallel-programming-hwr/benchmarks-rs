@@ -22,6 +22,8 @@ version = "0.1.0"
 dependencies = [
  "benchlib-rs",
  "crossbeam-channel",
+ "crossbeam-utils",
+ "num_cpus",
  "rayon",
 ]
 

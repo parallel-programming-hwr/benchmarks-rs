@@ -1,6 +1,9 @@
 use crossbeam_channel::unbounded;
+use crossbeam_utils::sync::WaitGroup;
+use num_cpus;
 use rayon::prelude::*;
 use std::sync::mpsc::channel;
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 pub fn start_stop_thread() {
@@ -10,9 +13,9 @@ pub fn start_stop_thread() {
     handle.join().unwrap();
 }
 
-pub fn summation_to_1000() -> u128 {
+pub fn summation_to(end: u128) -> u128 {
     let mut res = 0u128;
-    for i in 0u128..1000 {
+    for i in 0u128..end {
         res += i;
     }
     res
@@ -81,4 +84,37 @@ pub fn send_mpmc_channel() {
     }
     std::mem::drop(rx);
     handle.join().unwrap();
+}
+
+pub fn summation_using_mutex(end: usize) -> u128 {
+    let wg = WaitGroup::new();
+    let num = Arc::new(Mutex::new(0u128));
+
+    for thread_number in 0..num_cpus::get() {
+        let wg = wg.clone();
+        let num = Arc::clone(&num);
+        thread::spawn(move || {
+            for i in (thread_number..end).step_by(num_cpus::get()) {
+                *num.lock().unwrap() += i as u128;
+            }
+            std::mem::drop(wg);
+        });
+    }
+    wg.wait();
+    let result = *num.lock().unwrap();
+
+    result
+}
+
+pub fn start_and_wait_for_num_cpu_threads() {
+    let wg = WaitGroup::new();
+
+    for thread_number in 0..num_cpus::get() {
+        let wg = wg.clone();
+        thread::spawn(move || {
+            std::mem::drop(wg);
+            thread_number
+        });
+    }
+    wg.wait();
 }
