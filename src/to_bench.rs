@@ -1,6 +1,7 @@
 use crossbeam_channel::unbounded;
 use crossbeam_utils::sync::WaitGroup;
 use num_cpus;
+use num_traits::{PrimInt, Unsigned};
 use rayon::prelude::*;
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
@@ -13,10 +14,12 @@ pub fn start_stop_thread() {
     handle.join().unwrap();
 }
 
-pub fn summation_to(end: u128) -> u128 {
-    let mut res = 0u128;
-    for i in 0u128..end {
-        res += i;
+pub fn summation_to<T: PrimInt + Unsigned>(end: T) -> T {
+    let mut res: T = T::zero();
+    let mut i = T::zero();
+    while i < end {
+        res = res + i;
+        i = i + T::one();
     }
     res
 }

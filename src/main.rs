@@ -3,6 +3,7 @@
 mod to_bench;
 
 use benchlib::benching::Bencher;
+use rayon::prelude::*;
 
 pub fn main() {
     let mut bencher = Bencher::new();
@@ -11,12 +12,24 @@ pub fn main() {
         .print_settings()
         .bench("Dry Run", || {})
         .bench("Multiply to 100", || to_bench::multiply_to(100))
-        .bench("Summation from 0u128 to 1000", || {
-            to_bench::summation_to(1000)
+        .bench("Summation from 0u32 to 10000", || {
+            to_bench::summation_to::<u32>(10000)
         })
+        .bench("Summation from 0u64 to 10000", || {
+            to_bench::summation_to::<u64>(10000)
+        })
+        .compare()
+        .bench("Summation from 0u128 to 10000", || {
+            to_bench::summation_to::<u128>(10000)
+        })
+        .compare()
+        .bench("Parallel summation using rayon from 0u128 to 10000", || {
+            (0u128..10000).into_par_iter().sum::<u128>()
+        })
+        .compare()
         .bench(
-            "Parallel summation with arc mutex from 0u128 to 1000",
-            || to_bench::summation_using_mutex(1000),
+            "Parallel summation with arc mutex from 0u128 to 10000",
+            || to_bench::summation_using_mutex(10000),
         )
         .compare()
         .set_iterations(1000)

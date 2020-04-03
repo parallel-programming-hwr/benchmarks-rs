@@ -23,6 +23,7 @@ dependencies = [
  "benchlib-rs",
  "crossbeam-channel",
  "crossbeam-utils",
+ "num-traits",
  "num_cpus",
  "rayon",
 ]
@@ -128,6 +129,15 @@ name = "memoffset"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4fc2c02a7e374099d4ee95a193111f72d2110197fe200272371758f6c3643d8"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c62be47e61d1842b9170f0fdeec8eba98e60e90e5446449a0545e5152acd7096"
 dependencies = [
  "autocfg",
 ]
