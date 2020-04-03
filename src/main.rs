@@ -7,11 +7,12 @@ use benchlib::benching::Bencher;
 pub fn main() {
     let mut bencher = Bencher::new();
     bencher
-        .set_iterations(100000000)
+        .set_iterations(1000000)
         .print_settings()
+        .bench("Dry Run", || {})
         .bench("Multiply to 100", || to_bench::multiply_to(100))
-        .bench("Summation from 0u128 to 1000000", || {
-            to_bench::summation_to_1000000()
+        .bench("Summation from 0u128 to 1000", || {
+            to_bench::summation_to_1000()
         })
         .set_iterations(1000)
         .print_settings()

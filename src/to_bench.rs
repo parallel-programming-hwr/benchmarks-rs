@@ -10,9 +10,9 @@ pub fn start_stop_thread() {
     handle.join().unwrap();
 }
 
-pub fn summation_to_1000000() -> u128 {
+pub fn summation_to_1000() -> u128 {
     let mut res = 0u128;
-    for i in 0u128..1000000 {
+    for i in 0u128..1000 {
         res += i;
     }
     res
