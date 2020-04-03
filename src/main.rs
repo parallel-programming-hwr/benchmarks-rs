@@ -9,6 +9,12 @@ use std::time::{Duration, Instant};
 use termion::{color, style};
 
 #[derive(Debug, Clone)]
+struct DurationDifference {
+    pub inner: Duration,
+    pub positive: bool,
+}
+
+#[derive(Debug, Clone)]
 struct BenchVec {
     pub inner: Vec<Duration>,
 }
@@ -59,6 +65,23 @@ impl BenchVec {
     pub fn standard_deviation(&self) -> f64 {
         (self.sum().as_nanos() as f64 / (self.len() as f64 - 1f64)).sqrt()
     }
+
+    /// Compares two benchmarks by calculating the average
+    pub fn compare(&self, other: Self) -> DurationDifference {
+        let avg1 = self.average();
+        let avg2 = other.average();
+        if avg1 > avg2 {
+            DurationDifference {
+                inner: avg1 - avg2,
+                positive: true,
+            }
+        } else {
+            DurationDifference {
+                inner: avg2 - avg1,
+                positive: false,
+            }
+        }
+    }
 }
 
 impl Display for BenchVec {
@@ -67,39 +90,60 @@ impl Display for BenchVec {
         let standard_deviation = self.standard_deviation();
         write!(
             f,
-            "Average Duration: {:?} (±{:.2}ns ~ {:.1}%)",
+            "Average Duration: {:?} (±{:.2}ns ~ {:.2}%)",
             avg_duration,
             standard_deviation,
             (standard_deviation / avg_duration.as_nanos() as f64) * 100f64
         )
     }
 }
+
+impl Display for DurationDifference {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}{:?}",
+            if self.positive { "+" } else { "-" },
+            self.inner
+        )
+    }
+}
+
 const BENCHMARK_ITERATIONS: usize = 1000;
 
 pub fn main() {
-    bench_function("Spawn and Stop thread", || {
-        to_test::start_stop_thread();
+    bench_function("Spawn and Stop thread", || to_test::start_stop_thread());
+    let mpsc = bench_function("MPSC channel 1000 u128", || to_test::send_mpsc_channel());
+    let diff_channels =
+        bench_function("MPMC channel 1000 u128", || to_test::send_mpmc_channel()).compare(mpsc);
+    println!("Difference:\t {}", diff_channels);
+    bench_function("Multiply to 100", || to_test::multiply_to(100));
+    let largest_single = bench_function("Largest prime until 10000000", || {
+        to_test::largest_prime(10000000)
     });
-    bench_function("MPSC channel 1000 u128", || {
-        to_test::send_mpsc_channel();
-    });
-    bench_function("MPMC channel 1000 u128", || {
-        to_test::send_mpmc_channel();
-    });
-    bench_function("Multiply to 100", || {
-        to_test::multiply_to(100);
-    });
-    bench_function("Largest prime until 10000000", || {
-        to_test::largest_prime(10000000);
-    });
-    bench_function("Largest prime parallel until 10000000", || {
-        to_test::largest_prime_par(10000000);
+    let diff = bench_function("Largest prime parallel until 10000000", || {
+        to_test::largest_prime_par(10000000)
     })
+    .compare(largest_single);
+    println!("Difference:\t {}", diff)
+}
+
+/// Benchmarks a closure a given number of times and returns the
+/// average duration as well as all measured durations
+fn bench_n_times<T, F: Fn() -> T>(n: usize, func: F) -> BenchVec {
+    let mut durations = BenchVec::new();
+    for _ in 0..n {
+        let start = Instant::now();
+        func();
+        durations.push(start.elapsed());
+    }
+
+    durations
 }
 
 /// Benchmarks a closure a specific number of times
 /// and reports the results to the commandline
-fn bench_function<F: Fn()>(name: &str, func: F) {
+fn bench_function<T, F: Fn() -> T>(name: &str, func: F) -> BenchVec {
     println!(
         "\n{}{}{}{}",
         color::Fg(color::LightBlue),
@@ -114,19 +158,8 @@ fn bench_function<F: Fn()>(name: &str, func: F) {
         println!("Durations:\t {:?}", bench_durations.inner);
     }
     println!("{}", bench_durations);
-}
 
-/// Benchmarks a closure a given number of times and returns the
-/// average duration as well as all measured durations
-fn bench_n_times<F: Fn()>(n: usize, func: F) -> BenchVec {
-    let mut durations = BenchVec::new();
-    for _ in 0..n {
-        let start = Instant::now();
-        func();
-        durations.push(start.elapsed());
-    }
-
-    durations
+    bench_durations
 }
 
 mod to_test {
