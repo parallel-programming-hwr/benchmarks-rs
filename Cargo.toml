@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 rayon = "1.3.0"
 crossbeam-channel = "0.4.2"
-benchlib-rs = "0.2.0"
+benchlib-rs = "0.2.2"

@@ -1,101 +1,33 @@
 #![allow(dead_code)]
 
+mod to_bench;
+
 use benchlib::benching::Bencher;
 
 pub fn main() {
     let mut bencher = Bencher::new();
     bencher
-        .set_iterations(10000)
-        .bench("Multiply to 100", || to_test::multiply_to(100))
-        .bench("Spawn and Stop thread", || to_test::start_stop_thread())
-        .bench("MPSC channel 1000 u128", || to_test::send_mpsc_channel())
-        .bench("MPMC channel 1000 u128", || to_test::send_mpmc_channel())
+        .set_iterations(100000000)
+        .print_settings()
+        .bench("Multiply to 100", || to_bench::multiply_to(100))
+        .bench("Summation from 0u128 to 1000000", || {
+            to_bench::summation_to_1000000()
+        })
+        .set_iterations(1000)
+        .print_settings()
+        .bench("Spawn and Stop thread", || to_bench::start_stop_thread())
+        .bench("MPSC channel transmit 1000x u128", || {
+            to_bench::send_mpsc_channel()
+        })
+        .bench("MPMC channel transmit 1000x u128", || {
+            to_bench::send_mpmc_channel()
+        })
         .compare()
         .bench("Largest prime until 1000000", || {
-            to_test::largest_prime(1000000)
+            to_bench::largest_prime(1000000)
         })
         .bench("Largest prime parallel until 1000000", || {
-            to_test::largest_prime_par(1000000)
+            to_bench::largest_prime_par(1000000)
         })
         .compare();
-}
-
-mod to_test {
-
-    use crossbeam_channel::unbounded;
-    use rayon::prelude::*;
-    use std::sync::mpsc::channel;
-    use std::thread;
-
-    pub fn start_stop_thread() {
-        let handle = thread::spawn(|| {
-            return;
-        });
-        handle.join().unwrap();
-    }
-
-    pub fn multiply_to(end: usize) -> f64 {
-        let mut result = 0f64;
-        for i in 2..end {
-            result = (result * i as f64) / (i - 1) as f64;
-        }
-
-        result
-    }
-
-    pub fn largest_prime(end: u128) -> u128 {
-        let mut last_prime = 2;
-        for i in (2u128..end).step_by(2) {
-            let mut is_prime = true;
-            for j in 2..(i as f64).sqrt().ceil() as u128 {
-                if i % j == 0 {
-                    is_prime = false;
-                    break;
-                }
-            }
-            if is_prime {
-                last_prime = i;
-            }
-        }
-
-        last_prime
-    }
-
-    pub fn largest_prime_par(end: u128) -> u128 {
-        (2u128..((end as f64) / 2f64).ceil() as u128)
-            .into_par_iter()
-            .filter(|number| {
-                let num = number * 2;
-                for i in 2..(num as f64).sqrt().ceil() as u128 {
-                    if num % i == 0 {
-                        return false;
-                    }
-                }
-
-                true
-            })
-            .max()
-            .unwrap()
-            * 2
-    }
-
-    pub fn send_mpsc_channel() {
-        let (rx, tx) = channel::<u128>();
-        let handle = thread::spawn(move || for _ in tx {});
-        for i in 0..1000 {
-            rx.send(i).unwrap();
-        }
-        std::mem::drop(rx);
-        handle.join().unwrap();
-    }
-
-    pub fn send_mpmc_channel() {
-        let (rx, tx) = unbounded::<u128>();
-        let handle = thread::spawn(move || for _ in tx {});
-        for i in 0..1000 {
-            rx.send(i).unwrap();
-        }
-        std::mem::drop(rx);
-        handle.join().unwrap();
-    }
 }
