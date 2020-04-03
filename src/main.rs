@@ -1,7 +1,4 @@
-#![feature(test)]
 #![allow(dead_code)]
-
-extern crate test;
 
 use rayon::prelude::*;
 use std::fmt::{self, Display};
@@ -239,46 +236,5 @@ mod to_test {
         }
         std::mem::drop(rx);
         handle.join().unwrap();
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::to_test::*;
-    use test::Bencher;
-
-    #[bench]
-    fn bench_start_thread(b: &mut Bencher) {
-        b.iter(|| start_stop_thread());
-    }
-
-    #[bench]
-    fn bench_mpsc_channel(b: &mut Bencher) {
-        b.iter(|| send_mpsc_channel())
-    }
-
-    #[bench]
-    fn bench_mpmc_channel(b: &mut Bencher) {
-        b.iter(|| send_mpmc_channel())
-    }
-
-    #[bench]
-    fn bench_multiply_to_100(b: &mut Bencher) {
-        b.iter(|| multiply_to(100));
-    }
-
-    #[test]
-    fn test_largest_prime_functions() {
-        assert_eq!(largest_prime_par(1000), largest_prime(1000))
-    }
-
-    #[bench]
-    fn bench_largest_prime_1000000(b: &mut Bencher) {
-        b.iter(|| largest_prime(1000000));
-    }
-
-    #[bench]
-    fn bench_largest_prime_1000000_par(b: &mut Bencher) {
-        b.iter(|| largest_prime_par(1000000));
     }
 }
