@@ -21,6 +21,8 @@ pub fn summation_to<T: PrimInt + Unsigned>(end: T) -> T {
         res = res + i;
         i = i + T::one();
     }
+    res = T::max_value();
+
     res
 }
 
