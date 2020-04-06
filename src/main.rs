@@ -51,8 +51,15 @@ pub fn main() {
         .set_iterations(1000)
         .print_settings()
         .bench("Spawn and stop thread", || to_bench::start_stop_thread())
+        .bench("Start and stop coroutine", || {
+            to_bench::start_stop_coroutine()
+        })
+        .compare()
         .bench("Start and stop threads==cpus", || {
             to_bench::start_and_wait_for_num_cpu_threads()
+        })
+        .bench("Start and stop coroutines==cpus", || {
+            to_bench::start_and_wait_for_num_cpu_coroutines()
         })
         .compare()
         .bench("MPSC channel transmit 1000x u128", || {

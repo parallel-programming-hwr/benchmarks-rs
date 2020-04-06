@@ -1,5 +1,6 @@
 use crossbeam_channel::unbounded;
 use crossbeam_utils::sync::WaitGroup;
+use may::go;
 use num_cpus;
 use num_traits::{PrimInt, Unsigned};
 use rayon::prelude::*;
@@ -11,6 +12,13 @@ use std::u64;
 
 pub fn start_stop_thread() {
     let handle = thread::spawn(|| {
+        return;
+    });
+    handle.join().unwrap();
+}
+
+pub fn start_stop_coroutine() {
+    let handle = go!(|| {
         return;
     });
     handle.join().unwrap();
@@ -119,6 +127,19 @@ pub fn start_and_wait_for_num_cpu_threads() {
     for thread_number in 0..num_cpus::get() {
         let wg = wg.clone();
         thread::spawn(move || {
+            std::mem::drop(wg);
+            thread_number
+        });
+    }
+    wg.wait();
+}
+
+pub fn start_and_wait_for_num_cpu_coroutines() {
+    let wg = WaitGroup::new();
+
+    for thread_number in 0..num_cpus::get() {
+        let wg = wg.clone();
+        go!(move || {
             std::mem::drop(wg);
             thread_number
         });
