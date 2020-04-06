@@ -5,12 +5,16 @@ mod to_bench;
 use crate::to_bench::{bitshift_byte, max_f32_multiplication, max_u64_multiplications};
 use benchlib::benching::Bencher;
 use rayon::prelude::*;
+use std::fs::File;
+use std::io::BufWriter;
 
 pub fn noop() {}
 
 pub fn main() {
     let mut bencher = Bencher::new();
+    let file = File::create("benchmarks.tsv").unwrap();
     bencher
+        .write_output_to(BufWriter::new(file))
         .set_iterations(10000)
         .print_settings()
         .bench("Empty closure", || {})
@@ -64,7 +68,9 @@ pub fn main() {
         .bench("Largest prime parallel until 1000000", || {
             to_bench::largest_prime_par(1000000)
         })
-        .compare();
+        .compare()
+        .flush()
+        .unwrap();
 }
 
 #[cfg(test)]

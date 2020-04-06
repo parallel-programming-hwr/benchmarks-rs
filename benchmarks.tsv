@@ -1,0 +1,19 @@
+name	duration	standard_deviation
+Empty closure	7ns	2.70ns
+Empty fn	8ns	2.91ns
+Empty loop to 1000	9.875µs	99.38ns
+u64::MAX x u64::MAX 1000 times	11.04µs	105.08ns
+f32::MAX x f32::MAX 1000 times	11.034µs	105.05ns
+Bitshift u16 1 byte 1000 times	5.576µs	74.68ns
+Multiply to 100	1.381µs	37.17ns
+Summation from 0u32 to 10000	9ns	3.04ns
+Summation from 0u64 to 10000	7ns	2.75ns
+Summation from 0u128 to 10000	7ns	2.75ns
+Parallel summation using rayon from 0u128 to 10000	149.392µs	386.53ns
+Parallel summation with arc mutex from 0u128 to 10000	2.180271ms	1476.65ns
+Spawn and stop thread	31.569µs	177.77ns
+Start and stop threads==cpus	135.437µs	368.20ns
+MPSC channel transmit 1000x u128	148.879µs	386.04ns
+MPMC channel transmit 1000x u128	143.763µs	379.35ns
+Largest prime until 1000000	24.013261ms	4902.78ns
+Largest prime parallel until 1000000	7.482265ms	2736.74ns
